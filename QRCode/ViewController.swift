@@ -1,15 +1,13 @@
-//
-//  ViewController.swift
-//  QRCode
-//
-//  Created by kevinlien on 2018/4/6.
-//  Copyright © 2018年 Lien. All rights reserved.
-//
-
 import UIKit
 
-class ViewController: UIViewController {
+import AVFoundation
 
+class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+
+    var captureSession = AVCaptureSession()
+    var videoPreviewLayer: AVCaptureVideoPreviewLayer?
+    var qrCodeFrameView: UIView?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
