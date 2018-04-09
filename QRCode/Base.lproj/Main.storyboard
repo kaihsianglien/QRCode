@@ -26,11 +26,16 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1TX-Xh-zfD">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="395"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="dishView" destination="1TX-Xh-zfD" id="aWk-Zh-EzI"/>
                         <outlet property="linkLabel" destination="rYq-wZ-veK" id="zRe-XN-ZLI"/>
                     </connections>
                 </viewController>

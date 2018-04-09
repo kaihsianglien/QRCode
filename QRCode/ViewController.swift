@@ -9,6 +9,9 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     var qrCodeFrameView: UIView?
     
     @IBOutlet weak var linkLabel: UILabel!
+    @IBOutlet weak var dishView: UIImageView!
+    
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,6 +53,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
                 qrCodeFrameView.layer.borderWidth = 2
                 view.addSubview(qrCodeFrameView)
                 view.bringSubview(toFront: qrCodeFrameView)
+                view.bringSubview(toFront: dishView)
             }
             
         } catch {
@@ -82,6 +86,40 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             
             if metadataObj.stringValue != nil {
                 linkLabel.text = metadataObj.stringValue
+                
+                if let URL_IMAGE = URL(string: metadataObj.stringValue!){
+                    
+                    // Creating a session object with the default configuration.
+                    // You can read more about it here https://developer.apple.com/reference/foundation/urlsessionconfiguration
+                    let session = URLSession(configuration: .default)
+                    
+                    // Define a download task. The download task will download the contents of the URL as a Data object
+                    let getImageFromUrl = session.dataTask(with: URL_IMAGE) { (data, response, error) in
+                        // The download has finished. if there is any error
+                        if let e = error {
+                            print("Error Occurred: \(e)")
+                        } else {
+                            // No errors found.
+                            if (response as? HTTPURLResponse) != nil {
+                                //checking if the response contains an image
+                                if let imageData = data {
+                                    //convert that Data into an image
+                                    let image = UIImage(data: imageData)
+                                    //view must be used from main thread only, see https://developer.apple.com/documentation/code_diagnostics/main_thread_checker
+                                    DispatchQueue.main.async {
+                                        self.dishView.image = image
+                                    }
+                                } else {
+                                    print("Couldn't get image: Image is nil")
+                                }
+                            } else {
+                                print("Couldn't get response code for some reason")
+                            }
+                        }
+                    }
+                    //starting the download task
+                    getImageFromUrl.resume()
+                }
             }
         }
     }
