@@ -43,10 +43,19 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             //start capturing vedio
             captureSession.startRunning()
             
+            //set QRCode scanning region to exclude dishView area 0.0 375.0 375.0 292.0
+            let rectRegion = CGRect(x: view.frame.minX, y: dishView.frame.maxY, width: view.frame.maxX, height: view.frame.maxY - dishView.frame.maxY)
+            
+            //!!! rectOfInterest has an UPRIGHT origin with value 0~1
+            //use metadataOutputRectConverted to convert coordinate, beware this has to be under captureSession.startRunning()
+            if let convertedRectRegion = videoPreviewLayer?.metadataOutputRectConverted(fromLayerRect: rectRegion){
+                captureMetadataOutput.rectOfInterest = convertedRectRegion
+            }
+            
             //make linkLabel to front to be visible
             view.bringSubview(toFront: linkLabel)
             
-            // initialize QR Code frame wi¥hich appears when a code is found
+            // initialize QR Code frame which appears when a code is found
             qrCodeFrameView = UIView()
             if let qrCodeFrameView = qrCodeFrameView {
                 qrCodeFrameView.layer.borderColor = UIColor.green.cgColor
