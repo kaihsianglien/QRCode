@@ -34,22 +34,31 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             //the metadata should be converted via QR .qr type
             captureMetadataOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
             
+            //set QRCode scanning region to exclude dishView area
+            let frameWidth:CGFloat = 16
+            let rectRegion = CGRect(x: view.frame.minX + frameWidth, y: dishView.frame.maxY + frameWidth, width: view.frame.maxX - frameWidth * 2, height: view.frame.maxY - dishView.frame.height - frameWidth * 3)
+            //(16.0, 375.0, 343.0, 292.0)
+            print(rectRegion)
+            let scanAreaView = UIView(frame: rectRegion)
+            //(16 375; 343 292)
+            print(scanAreaView)
+            
             //initial previewlayer and add as sublayer
             videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
             videoPreviewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
-            videoPreviewLayer?.frame = view.layer.bounds
+            videoPreviewLayer?.frame = scanAreaView.layer.frame
+            //(0.0, 0.0, 343.0, 292.0)
+            print(videoPreviewLayer?.frame)
             view.layer.addSublayer(videoPreviewLayer!)
             
             //start capturing vedio
             captureSession.startRunning()
             
-            //set QRCode scanning region to exclude dishView area 0.0 375.0 375.0 292.0
-            let rectRegion = CGRect(x: view.frame.minX, y: dishView.frame.maxY, width: view.frame.maxX, height: view.frame.maxY - dishView.frame.maxY)
-            
             //!!! rectOfInterest has an UPRIGHT origin with value 0~1
             //use metadataOutputRectConverted to convert coordinate, beware this has to be under captureSession.startRunning()
             if let convertedRectRegion = videoPreviewLayer?.metadataOutputRectConverted(fromLayerRect: rectRegion){
                 captureMetadataOutput.rectOfInterest = convertedRectRegion
+                //print(convertedRectRegion)
             }
             
             //make linkLabel to front to be visible
