@@ -31,6 +31,11 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <view contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="scanView" translatesAutoresizingMaskIntoConstraints="NO" id="sKL-F5-ffT" userLabel="Scan View">
+                                <rect key="frame" x="16" y="367" width="343" height="253"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" red="0.70629892090000002" green="0.83828371759999998" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -38,6 +43,7 @@
                     <connections>
                         <outlet property="dishView" destination="1TX-Xh-zfD" id="aWk-Zh-EzI"/>
                         <outlet property="linkLabel" destination="rYq-wZ-veK" id="zRe-XN-ZLI"/>
+                        <outlet property="scanView" destination="sKL-F5-ffT" id="Cio-hz-k79"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

@@ -8,13 +8,23 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     var qrCodeFrameView: UIView?
     
-    @IBOutlet weak var linkLabel: UILabel!
     @IBOutlet weak var dishView: UIImageView!
-    
-
+    @IBOutlet weak var scanView: UIView!
+    @IBOutlet weak var linkLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        createSession()
+    }
+    
+    
+     override func viewDidAppear(_ animated: Bool) {
+     super.viewDidAppear(animated)
+     //videoPreviewLayer?.frame.size = scanView.frame.size
+     }
+    
+    
+    func createSession() {
         let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera], mediaType: AVMediaType.video, position: AVCaptureDevice.Position.back)
         
         guard let captureDevice = deviceDiscoverySession.devices.first else {
@@ -34,21 +44,11 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             //the metadata should be converted via QR .qr type
             captureMetadataOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
             
-            //set QRCode scanning region to exclude dishView area
-            let frameWidth:CGFloat = 16
-            let rectRegion = CGRect(x: view.frame.minX + frameWidth, y: dishView.frame.maxY + frameWidth, width: view.frame.maxX - frameWidth * 2, height: view.frame.maxY - dishView.frame.height - frameWidth * 3)
-            //(16.0, 375.0, 343.0, 292.0)
-            print(rectRegion)
-            let scanAreaView = UIView(frame: rectRegion)
-            //(16 375; 343 292)
-            print(scanAreaView)
-            
             //initial previewlayer and add as sublayer
             videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
             videoPreviewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
-            videoPreviewLayer?.frame = scanAreaView.layer.frame
-            //(0.0, 0.0, 343.0, 292.0)
-            print(videoPreviewLayer?.frame)
+            
+            videoPreviewLayer?.frame = scanView.layer.frame
             view.layer.addSublayer(videoPreviewLayer!)
             
             //start capturing vedio
@@ -56,9 +56,9 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             
             //!!! rectOfInterest has an UPRIGHT origin with value 0~1
             //use metadataOutputRectConverted to convert coordinate, beware this has to be under captureSession.startRunning()
-            if let convertedRectRegion = videoPreviewLayer?.metadataOutputRectConverted(fromLayerRect: rectRegion){
+            //TODO: sort out boundary
+            if let convertedRectRegion = videoPreviewLayer?.metadataOutputRectConverted(fromLayerRect: view.layer.frame){
                 captureMetadataOutput.rectOfInterest = convertedRectRegion
-                //print(convertedRectRegion)
             }
             
             //make linkLabel to front to be visible
