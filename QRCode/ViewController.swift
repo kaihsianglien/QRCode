@@ -1,6 +1,9 @@
 import UIKit
 //
 import AVFoundation
+//
+import AWSCore
+import AWSS3
 
 class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
 
@@ -12,17 +15,37 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     @IBOutlet weak var scanView: UIView!
     @IBOutlet weak var linkLabel: UILabel!
     
+    var previousString = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //rounded corners and shadows can't exist within one layer in swift, see
+        //https://medium.com/swifty-tim/views-with-rounded-corners-and-shadows-c3adc0085182
+        //dishView.layer.cornerRadius = 10
+        //dishView.layer.masksToBounds = true
+
+        dishView.layer.shadowColor = UIColor.black.cgColor
+        dishView.layer.shadowOffset = CGSize(width: 10, height: 10)
+        dishView.layer.shadowRadius = 3;
+        dishView.layer.shadowOpacity = 0.8;
+        
+        scanView.layer.borderColor = UIColor.red.cgColor
+        scanView.layer.borderWidth = 3
+        
+        linkLabel.layer.cornerRadius = 20
+        linkLabel.layer.borderColor = UIColor.gray.cgColor
+        linkLabel.layer.borderWidth = 1
+        //masksToBounds: A Boolean indicating whether sublayers are clipped to the layer’s bounds
+        linkLabel.layer.masksToBounds = true
+        
         createSession()
     }
-    
     
      override func viewDidAppear(_ animated: Bool) {
      super.viewDidAppear(animated)
      //videoPreviewLayer?.frame.size = scanView.frame.size
      }
-    
     
     func createSession() {
         let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera], mediaType: AVMediaType.video, position: AVCaptureDevice.Position.back)
@@ -81,11 +104,6 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         }
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         // check metadataObjects arrays as it should at least has one object of QR code
         if metadataObjects.count == 0 {
@@ -105,41 +123,107 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             if metadataObj.stringValue != nil {
                 linkLabel.text = metadataObj.stringValue
                 
-                if let URL_IMAGE = URL(string: metadataObj.stringValue!){
+                //skip processing the same QR code, only respond with different code
+                if(previousString != metadataObj.stringValue) {
+                    //AWS download function
+                    //downloadData(dishName: metadataObj.stringValue!)
                     
-                    // Creating a session object with the default configuration.
-                    // You can read more about it here https://developer.apple.com/reference/foundation/urlsessionconfiguration
-                    let session = URLSession(configuration: .default)
-                    
-                    // Define a download task. The download task will download the contents of the URL as a Data object
-                    let getImageFromUrl = session.dataTask(with: URL_IMAGE) { (data, response, error) in
-                        // The download has finished. if there is any error
-                        if let e = error {
-                            print("Error Occurred: \(e)")
-                        } else {
-                            // No errors found.
-                            if (response as? HTTPURLResponse) != nil {
-                                //checking if the response contains an image
-                                if let imageData = data {
-                                    //convert that Data into an image
-                                    let image = UIImage(data: imageData)
-                                    //view must be used from main thread only, see https://developer.apple.com/documentation/code_diagnostics/main_thread_checker
-                                    DispatchQueue.main.async {
-                                        self.dishView.image = image
-                                    }
-                                } else {
-                                    print("Couldn't get image: Image is nil")
-                                }
-                            } else {
-                                print("Couldn't get response code for some reason")
-                            }
-                        }
-                    }
-                    //starting the download task
-                    getImageFromUrl.resume()
+                    //this is the direct download without AWS
+                    downloadDataDirectMethod(metadataObj: metadataObj)
+                    print("previousString " + previousString + " //end")
+                    print("currentString " + metadataObj.stringValue! + " //end")
+                    previousString = metadataObj.stringValue!
+                    print("previousStringAfter " + previousString + " //end")
+                    print("currentStringAfter " + metadataObj.stringValue! + " //end")
                 }
+                
+                
+                
             }
         }
     }
+    
+    func downloadData(dishName: String) {
+        let expression = AWSS3TransferUtilityDownloadExpression()
+        expression.progressBlock = {(task, progress) in DispatchQueue.main.async(execute: {
+            // Do something e.g. Update a progress bar.
+            //Reference to property 'linkLabel' in closure requires explicit 'self.' to make capture semantics explicit
+        })
+        }
+        
+        var completionHandler: AWSS3TransferUtilityDownloadCompletionHandlerBlock?
+        completionHandler = { (task, URL, data, error) -> Void in
+            DispatchQueue.main.async(execute: {
+                if let error = error {
+                    print("localizedDescription: \(error.localizedDescription)")
+                    NSLog("Failed with error: \(error)")
+                }
+                else{
+                    self.dishView.image = UIImage(data: data!)
+                }
+            })
+        }
+        
+        let transferUtility = AWSS3TransferUtility.default()
+        transferUtility.downloadData(
+            fromBucket: "restaurantdishphoto",
+            //beware the filetype is fixed to jpg format
+            key: dishName+".jpg",
+            expression: expression,
+            completionHandler: completionHandler
+            ).continueWith {
+                (task) -> AnyObject! in if let error = task.error {
+                    print("Error: \(error.localizedDescription)")
+                }
+                
+                if let _ = task.result {
+                    // Do something with downloadTask.
+                    
+                }
+                return nil;
+        }
+    }
+    
+    func downloadDataDirectMethod(metadataObj: AVMetadataMachineReadableCodeObject) {
+        if let URL_IMAGE = URL(string: metadataObj.stringValue!){
+            
+            // Creating a session object with the default configuration.
+            // You can read more about it here https://developer.apple.com/reference/foundation/urlsessionconfiguration
+            let session = URLSession(configuration: .default)
+            
+            // Define a download task. The download task will download the contents of the URL as a Data object
+            let getImageFromUrl = session.dataTask(with: URL_IMAGE) { (data, response, error) in
+                // The download has finished. if there is any error
+                if let e = error {
+                    print("Error Occurred: \(e)")
+                } else {
+                    // No errors found.
+                    if (response as? HTTPURLResponse) != nil {
+                        //checking if the response contains an image
+                        if let imageData = data {
+                            //convert that Data into an image
+                            let image = UIImage(data: imageData)
+                            //view must be used from main thread only, see https://developer.apple.com/documentation/code_diagnostics/main_thread_checker
+                            DispatchQueue.main.async {
+                                self.dishView.image = image
+                            }
+                        } else {
+                            print("Couldn't get image: Image is nil")
+                        }
+                    } else {
+                        print("Couldn't get response code for some reason")
+                    }
+                }
+            }
+            //starting the download task
+            getImageFromUrl.resume()
+        }
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
 }
 
