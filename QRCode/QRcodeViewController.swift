@@ -5,7 +5,7 @@ import AVFoundation
 import AWSCore
 import AWSS3
 
-class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
 
     var captureSession = AVCaptureSession()
     var videoPreviewLayer: AVCaptureVideoPreviewLayer?
@@ -26,7 +26,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         //dishView.layer.masksToBounds = true
 
         dishView.layer.shadowColor = UIColor.black.cgColor
-        dishView.layer.shadowOffset = CGSize(width: 10, height: 10)
+        dishView.layer.shadowOffset = CGSize(width: 5, height: 5)
         dishView.layer.shadowRadius = 3;
         dishView.layer.shadowOpacity = 0.8;
         

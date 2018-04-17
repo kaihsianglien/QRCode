@@ -12,13 +12,13 @@
 		9C32ACED20821578006A1307 /* AWSCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C32ACEC20821578006A1307 /* AWSCore.framework */; };
 		9C32ACEF2082157D006A1307 /* AWSAuthCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C32ACEE2082157D006A1307 /* AWSAuthCore.framework */; };
 		9C32ACF120822123006A1307 /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 9C32ACF020822123006A1307 /* awsconfiguration.json */; };
-		9C6EB1E52084AA2B0096925A /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 9C6EB1E42084AA2B0096925A /* art.scnassets */; };
 		9C9B9DB1207891B0004F6322 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C9B9DB0207891B0004F6322 /* AppDelegate.swift */; };
-		9C9B9DB3207891B0004F6322 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C9B9DB2207891B0004F6322 /* ViewController.swift */; };
+		9C9B9DB3207891B0004F6322 /* QRcodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C9B9DB2207891B0004F6322 /* QRcodeViewController.swift */; };
 		9C9B9DB6207891B0004F6322 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9C9B9DB4207891B0004F6322 /* Main.storyboard */; };
 		9C9B9DB8207891B2004F6322 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9C9B9DB7207891B2004F6322 /* Assets.xcassets */; };
 		9C9B9DBB207891B2004F6322 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9C9B9DB9207891B2004F6322 /* LaunchScreen.storyboard */; };
 		9CC8E6FA2084A26300D5DEA4 /* ARmodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CC8E6F92084A26300D5DEA4 /* ARmodeViewController.swift */; };
+		9CD682932085A40A00507F92 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 9CD682922085A40A00507F92 /* art.scnassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,15 +28,15 @@
 		9C32ACEC20821578006A1307 /* AWSCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C32ACEE2082157D006A1307 /* AWSAuthCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSAuthCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C32ACF020822123006A1307 /* awsconfiguration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = awsconfiguration.json; sourceTree = "<group>"; };
-		9C6EB1E42084AA2B0096925A /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
 		9C9B9DAD207891B0004F6322 /* QRCode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QRCode.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C9B9DB0207891B0004F6322 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		9C9B9DB2207891B0004F6322 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		9C9B9DB2207891B0004F6322 /* QRcodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRcodeViewController.swift; sourceTree = "<group>"; };
 		9C9B9DB5207891B0004F6322 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		9C9B9DB7207891B2004F6322 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9C9B9DBA207891B2004F6322 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9C9B9DBC207891B2004F6322 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9CC8E6F92084A26300D5DEA4 /* ARmodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARmodeViewController.swift; sourceTree = "<group>"; };
+		9CD682922085A40A00507F92 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
 		B2F1F794A23F63C433104956 /* Pods-QRCode.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QRCode.debug.xcconfig"; path = "Pods/Target Support Files/Pods-QRCode/Pods-QRCode.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -77,11 +77,11 @@
 			isa = PBXGroup;
 			children = (
 				9C9B9DB0207891B0004F6322 /* AppDelegate.swift */,
-				9C9B9DB2207891B0004F6322 /* ViewController.swift */,
+				9C9B9DB2207891B0004F6322 /* QRcodeViewController.swift */,
 				9C32ACF020822123006A1307 /* awsconfiguration.json */,
 				9C9B9DB4207891B0004F6322 /* Main.storyboard */,
 				9CC8E6F92084A26300D5DEA4 /* ARmodeViewController.swift */,
-				9C6EB1E42084AA2B0096925A /* art.scnassets */,
+				9CD682922085A40A00507F92 /* art.scnassets */,
 				9C9B9DB7207891B2004F6322 /* Assets.xcassets */,
 				9C9B9DB9207891B2004F6322 /* LaunchScreen.storyboard */,
 				9C9B9DBC207891B2004F6322 /* Info.plist */,
@@ -171,7 +171,7 @@
 			files = (
 				9C32ACF120822123006A1307 /* awsconfiguration.json in Resources */,
 				9C9B9DBB207891B2004F6322 /* LaunchScreen.storyboard in Resources */,
-				9C6EB1E52084AA2B0096925A /* art.scnassets in Resources */,
+				9CD682932085A40A00507F92 /* art.scnassets in Resources */,
 				9C9B9DB8207891B2004F6322 /* Assets.xcassets in Resources */,
 				9C9B9DB6207891B0004F6322 /* Main.storyboard in Resources */,
 			);
@@ -231,7 +231,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9C9B9DB3207891B0004F6322 /* ViewController.swift in Sources */,
+				9C9B9DB3207891B0004F6322 /* QRcodeViewController.swift in Sources */,
 				9CC8E6FA2084A26300D5DEA4 /* ARmodeViewController.swift in Sources */,
 				9C9B9DB1207891B0004F6322 /* AppDelegate.swift in Sources */,
 			);
