@@ -1,15 +1,39 @@
+//"Côte De Bœuf" form Bart @ sketchfab
+//"Salmon ramen from Wagamama" from alban @ sketchfab
+//"Spicy Korean Fried Chicken" from Kabaq Augmented Reality Food @ sketchfab
+
+//see ARKit intro @ https://juejin.im/post/5ad0e8975188255c9323b490
+
 import UIKit
 import ARKit
 
 class ARmodeViewController: UIViewController, ARSCNViewDelegate {
     
     @IBOutlet weak var sceneView: ARSCNView!
+    @IBOutlet var didTapScreen: UITapGestureRecognizer!
+    
+    @IBAction func testButton(_ sender: Any) {
+        self.restartSession()
+    }
+    
+    //let configuration = ARWorldTrackingConfiguration()
+    
+    func restartSession() {
+        /*
+        sceneView.session.pause()
+        sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
+            node.removeFromParentNode()
+        }
+        sceneView.session.run(ARWorldTrackingConfiguration(), options: [.resetTracking, .removeExistingAnchors])
+        let scene = SCNScene(named: "art.scnassets/airplane.scn")!
+        sceneView.scene = scene
+        */
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //Create a new scene
-        //let scene = SCNScene(named: "art.scnassets/jetplane.scn")!
-        //Set the scene to the view
+        
+        //let scene = SCNScene(named: "art.scnassets/airplane.scn")!
         //sceneView.scene = scene
         
         configureLighting()
@@ -34,10 +58,15 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate {
         sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
     }
     
+    //let virtualObjectLoader = VirtualObjectLoader()
     //Once enough ARAnchor(object represents physical location & orientation in 3D space) is added renderer will be called
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         //
         guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+        
+        for object in VirtualObjectLoader().loadedObjects {
+            object.adjustOntoPlaneAnchor(planeAnchor, using: node)
+        }
         
         //create an SCNPlane to visualize the ARPlaneAnchor with x, z and make the color transparentLightBlue
         let width = CGFloat(planeAnchor.extent.x)
@@ -84,6 +113,8 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate {
         sceneView.automaticallyUpdatesLighting = true
     }
     
+    var objectAlreadyExist = false
+    
     @objc func addObjectToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
         let tapLocation = recognizer.location(in: sceneView)
         let hitTestResults = sceneView.hitTest(tapLocation, types: .existingPlaneUsingExtent)
@@ -94,13 +125,25 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate {
         let y = translation.y
         let z = translation.z
         
-        guard let shipScene = SCNScene(named: "art.scnassets/ship.scn"),
-            let shipNode = shipScene.rootNode.childNode(withName: "ship", recursively: false)
+        guard let objectScene = SCNScene(named: "art.scnassets/ship.scn"),
+            let objectNode = objectScene.rootNode.childNode(withName: "ship", recursively: false)
             else { return }
-        
-        shipNode.position = SCNVector3(x,y,z)
-        sceneView.scene.rootNode.addChildNode(shipNode)
-        //node.removeFromParentNode()
+        print("objectAlreadyExist: \(objectAlreadyExist)")
+        if (objectAlreadyExist != true) {
+            objectNode.position = SCNVector3(x,y,z)
+            sceneView.scene.rootNode.addChildNode(objectNode)
+            objectAlreadyExist = true
+            print("entered add part")
+        } else {
+            //sceneView.session.pause()
+            sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
+                node.removeFromParentNode()
+            }
+            //sceneView.session.run(ARWorldTrackingConfiguration(), options: [.resetTracking, .removeExistingAnchors])
+            //objectNode.removeFromParentNode()
+            objectAlreadyExist = false
+            print("entered remove part")
+        }
     }
     
     func addTapGestureToSceneView() {

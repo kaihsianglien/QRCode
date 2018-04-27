@@ -49,7 +49,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="136.80000000000001" y="132.68365817091455"/>
+            <point key="canvasLocation" x="404" y="-390"/>
         </scene>
         <!--ARmode-->
         <scene sceneID="M6u-ee-FJI">
@@ -62,19 +62,90 @@
                             <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BHQ-lG-GI5">
                                 <rect key="frame" x="0.0" y="20" width="375" height="598"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="1aQ-bb-Mhr" appends="YES" id="Bmd-O3-MJX"/>
+                                </connections>
                             </arscnView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C28-2s-E0Y">
+                                <rect key="frame" x="279" y="538" width="80" height="80"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Reset"/>
+                                <connections>
+                                    <action selector="testButton:" destination="isL-5u-qwk" eventType="touchUpInside" id="Kev-DH-KJw"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="plane" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ifV-I0-ATh">
+                                <rect key="frame" x="16" y="568" width="100" height="50"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="Jvv-Lo-pwy"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="ARmode" id="3XU-5F-N5r"/>
                     <connections>
+                        <outlet property="didTapScreen" destination="1aQ-bb-Mhr" id="cV7-ta-LQE"/>
                         <outlet property="sceneView" destination="BHQ-lG-GI5" id="Plu-me-GeE"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="c1v-Nn-VkD" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="1aQ-bb-Mhr"/>
             </objects>
-            <point key="canvasLocation" x="136.80000000000001" y="851.42428785607206"/>
+            <point key="canvasLocation" x="404" y="377.36131934032989"/>
+        </scene>
+        <!--About-->
+        <scene sceneID="5k8-wW-TuU">
+            <objects>
+                <viewController id="PXS-R9-syL" userLabel="About" customClass="AboutViewController" customModule="QRCode" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="spP-B6-OOw">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RVA-ih-vCX">
+                                <rect key="frame" x="0.0" y="20" width="375" height="598"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="company Information Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wlc-fD-yUd">
+                                        <rect key="frame" x="8" y="150" width="227" height="134"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="User Tutorial Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YyL-mG-WLy">
+                                        <rect key="frame" x="8" y="8" width="227" height="134"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="reviewLabel" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cyI-Qy-M0z">
+                                        <rect key="frame" x="8" y="292" width="227" height="134"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </scrollView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="8Jo-Nk-v85"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Item" id="lRu-Bh-Moy"/>
+                    <connections>
+                        <outlet property="companyInformationLabel" destination="Wlc-fD-yUd" id="kRg-Yq-aAH"/>
+                        <outlet property="reviewLabel" destination="cyI-Qy-M0z" id="2sN-nI-Tec"/>
+                        <outlet property="userTutorialLabel" destination="YyL-mG-WLy" id="41m-Pf-gQo"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="nc0-rC-tay" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="404" y="1078.1109445277361"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="G2n-fX-WYg">
@@ -88,6 +159,7 @@
                     <connections>
                         <segue destination="BYZ-38-t0r" kind="relationship" relationship="viewControllers" id="dEe-XD-z2v"/>
                         <segue destination="isL-5u-qwk" kind="relationship" relationship="viewControllers" id="2c9-Cd-EO7"/>
+                        <segue destination="PXS-R9-syL" kind="relationship" relationship="viewControllers" id="qrY-z4-cBn"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="od8-uX-Q0Y" userLabel="First Responder" sceneMemberID="firstResponder"/>

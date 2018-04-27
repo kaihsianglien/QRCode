@@ -15,6 +15,8 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
     @IBOutlet weak var scanView: UIView!
     @IBOutlet weak var linkLabel: UILabel!
     
+  
+    
     var previousString = ""
     
     override func viewDidLoad() {
@@ -130,11 +132,7 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                     
                     //this is the direct download without AWS
                     downloadDataDirectMethod(metadataObj: metadataObj)
-                    print("previousString " + previousString + " //end")
-                    print("currentString " + metadataObj.stringValue! + " //end")
                     previousString = metadataObj.stringValue!
-                    print("previousStringAfter " + previousString + " //end")
-                    print("currentStringAfter " + metadataObj.stringValue! + " //end")
                 }
                 
                 
