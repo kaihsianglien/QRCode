@@ -5,8 +5,25 @@ import AVFoundation
 import AWSCore
 import AWSS3
 
-class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+    
+    let images = ["book1", "book2", "book3", "book4", "book5", "book6", "book7", "book8", "book9", "book10", "book11", "book12", "book13", ]
 
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return images.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "dishThumbnailCell", for: indexPath) as! dishThumbnailCollectionViewCell
+        cell.dishThumbnailImageView.image = UIImage(named: images[indexPath.row])
+        cell.backgroundColor = UIColor.gray
+        return cell
+    }
+    
     var captureSession = AVCaptureSession()
     var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     var qrCodeFrameView: UIView?
@@ -15,18 +32,20 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
     @IBOutlet weak var scanView: UIView!
     @IBOutlet weak var linkLabel: UILabel!
     
-  
-    
     var previousString = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        modifyComponents()
+        createSession()
+    }
+    
+    func modifyComponents() {
         //rounded corners and shadows can't exist within one layer in swift, see
         //https://medium.com/swifty-tim/views-with-rounded-corners-and-shadows-c3adc0085182
         //dishView.layer.cornerRadius = 10
         //dishView.layer.masksToBounds = true
-
+        
         dishView.layer.shadowColor = UIColor.black.cgColor
         dishView.layer.shadowOffset = CGSize(width: 5, height: 5)
         dishView.layer.shadowRadius = 3;
@@ -40,8 +59,6 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         linkLabel.layer.borderWidth = 1
         //masksToBounds: A Boolean indicating whether sublayers are clipped to the layer’s bounds
         linkLabel.layer.masksToBounds = true
-        
-        createSession()
     }
     
      override func viewDidAppear(_ animated: Bool) {
@@ -85,9 +102,6 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
             if let convertedRectRegion = videoPreviewLayer?.metadataOutputRectConverted(fromLayerRect: view.layer.frame){
                 captureMetadataOutput.rectOfInterest = convertedRectRegion
             }
-            
-            //make linkLabel to front to be visible
-            view.bringSubview(toFront: linkLabel)
             
             // initialize QR Code frame which appears when a code is found
             qrCodeFrameView = UIView()
@@ -134,9 +148,6 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                     downloadDataDirectMethod(metadataObj: metadataObj)
                     previousString = metadataObj.stringValue!
                 }
-                
-                
-                
             }
         }
     }

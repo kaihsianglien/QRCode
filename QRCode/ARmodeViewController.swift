@@ -16,8 +16,6 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate {
         self.restartSession()
     }
     
-    //let configuration = ARWorldTrackingConfiguration()
-    
     func restartSession() {
         /*
         sceneView.session.pause()
@@ -32,10 +30,8 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         //let scene = SCNScene(named: "art.scnassets/airplane.scn")!
         //sceneView.scene = scene
-        
         configureLighting()
         addTapGestureToSceneView()
     }
@@ -113,8 +109,12 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate {
         sceneView.automaticallyUpdatesLighting = true
     }
     
-    var objectAlreadyExist = false
+    func addTapGestureToSceneView() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ARmodeViewController.addObjectToSceneView(withGestureRecognizer:)))
+        sceneView.addGestureRecognizer(tapGestureRecognizer)
+    }
     
+    var objectAlreadyExist = false
     @objc func addObjectToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
         let tapLocation = recognizer.location(in: sceneView)
         let hitTestResults = sceneView.hitTest(tapLocation, types: .existingPlaneUsingExtent)
@@ -128,27 +128,19 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate {
         guard let objectScene = SCNScene(named: "art.scnassets/ship.scn"),
             let objectNode = objectScene.rootNode.childNode(withName: "ship", recursively: false)
             else { return }
-        print("objectAlreadyExist: \(objectAlreadyExist)")
+        
+        //place object if not on table yet
         if (objectAlreadyExist != true) {
             objectNode.position = SCNVector3(x,y,z)
             sceneView.scene.rootNode.addChildNode(objectNode)
             objectAlreadyExist = true
-            print("entered add part")
+        //delete object if it it exist
         } else {
-            //sceneView.session.pause()
             sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
                 node.removeFromParentNode()
-            }
-            //sceneView.session.run(ARWorldTrackingConfiguration(), options: [.resetTracking, .removeExistingAnchors])
-            //objectNode.removeFromParentNode()
             objectAlreadyExist = false
-            print("entered remove part")
+            }
         }
-    }
-    
-    func addTapGestureToSceneView() {
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ARmodeViewController.addObjectToSceneView(withGestureRecognizer:)))
-        sceneView.addGestureRecognizer(tapGestureRecognizer)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
