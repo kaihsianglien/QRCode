@@ -1,16 +1,31 @@
-//"Côte De Bœuf" form Bart @ sketchfab
-//"Salmon ramen from Wagamama" from alban @ sketchfab
-//"Spicy Korean Fried Chicken" from Kabaq Augmented Reality Food @ sketchfab
-
 //see ARKit intro @ https://juejin.im/post/5ad0e8975188255c9323b490
 
 import UIKit
 import ARKit
 
-class ARmodeViewController: UIViewController, ARSCNViewDelegate {
+class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+    
+    var dicFromQR = [CellContent]()
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return dicFromQR.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "dishThumbnailCell", for: indexPath) as! dishThumbnailCollectionViewCell
+        cell.dishThumbnailImageView.image = dicFromQR[indexPath.row].image
+        cell.backgroundColor = UIColor.gray
+        return cell
+    }
     
     @IBOutlet weak var sceneView: ARSCNView!
     @IBOutlet var didTapScreen: UITapGestureRecognizer!
+    @IBOutlet weak var dishThumbnailCollectionViewAR: UICollectionView!
+    
     
     @IBAction func testButton(_ sender: Any) {
         self.restartSession()
@@ -34,6 +49,8 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate {
         //sceneView.scene = scene
         configureLighting()
         addTapGestureToSceneView()
+        //print(dicFromQR.count)
+        self.dishThumbnailCollectionViewAR.reloadData()
     }
     
     override func viewWillAppear(_ animated: Bool) {

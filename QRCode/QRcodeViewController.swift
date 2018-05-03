@@ -7,19 +7,19 @@ import AWSS3
 
 class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
     
-    let images = ["book1", "book2", "book3", "book4", "book5", "book6", "book7", "book8", "book9", "book10", "book11", "book12", "book13", ]
+    var dic = [CellContent]()
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return images.count
+        return dic.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "dishThumbnailCell", for: indexPath) as! dishThumbnailCollectionViewCell
-        cell.dishThumbnailImageView.image = UIImage(named: images[indexPath.row])
+        cell.dishThumbnailImageView.image = dic[indexPath.row].image
         cell.backgroundColor = UIColor.gray
         return cell
     }
@@ -31,11 +31,13 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
     @IBOutlet weak var dishView: UIImageView!
     @IBOutlet weak var scanView: UIView!
     @IBOutlet weak var linkLabel: UILabel!
-    
-    var previousString = ""
+    @IBOutlet weak var dishThumbnailCollectionViewQR: UICollectionView!
+
+    var dishUrlStringArray = [String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         modifyComponents()
         createSession()
     }
@@ -59,12 +61,10 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         linkLabel.layer.borderWidth = 1
         //masksToBounds: A Boolean indicating whether sublayers are clipped to the layer’s bounds
         linkLabel.layer.masksToBounds = true
+        linkLabel.numberOfLines = 0
+        linkLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
+        linkLabel.text = "name: XXX\nprice: XXX\ndescription: XXX"
     }
-    
-     override func viewDidAppear(_ animated: Bool) {
-     super.viewDidAppear(animated)
-     //videoPreviewLayer?.frame.size = scanView.frame.size
-     }
     
     func createSession() {
         let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [AVCaptureDevice.DeviceType.builtInWideAngleCamera], mediaType: AVMediaType.video, position: AVCaptureDevice.Position.back)
@@ -137,22 +137,25 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
             qrCodeFrameView?.frame = barCodeObject!.bounds
             
             if metadataObj.stringValue != nil {
-                linkLabel.text = metadataObj.stringValue
+                let downloadUrl = metadataObj.stringValue!
+                linkLabel.text = downloadUrl
                 
-                //skip processing the same QR code, only respond with different code
-                if(previousString != metadataObj.stringValue) {
+                //skip processing the same QR code, only respond with code not in database
+                if(!dishUrlStringArray.contains(downloadUrl)) {
+                    
                     //AWS download function
-                    //downloadData(dishName: metadataObj.stringValue!)
+                    downloadDataAWS(dishName: downloadUrl)
                     
                     //this is the direct download without AWS
-                    downloadDataDirectMethod(metadataObj: metadataObj)
-                    previousString = metadataObj.stringValue!
+                    //downloadDataDirectMethod(metadataObj: metadataObj)
+                    
+                    dishUrlStringArray.append(downloadUrl)
                 }
             }
         }
     }
     
-    func downloadData(dishName: String) {
+    func downloadDataAWS(dishName: String) {
         let expression = AWSS3TransferUtilityDownloadExpression()
         expression.progressBlock = {(task, progress) in DispatchQueue.main.async(execute: {
             // Do something e.g. Update a progress bar.
@@ -168,7 +171,11 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                     NSLog("Failed with error: \(error)")
                 }
                 else{
-                    self.dishView.image = UIImage(data: data!)
+                    if let downloadImage = UIImage(data: data!) {
+                        self.dishView.image = downloadImage
+                        self.adjustdishThumbnailCollectionViewQR(dishURL: dishName, dishImage: downloadImage)
+                        
+                    }
                 }
             })
         }
@@ -187,9 +194,8 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                 
                 if let _ = task.result {
                     // Do something with downloadTask.
-                    
                 }
-                return nil;
+                return nil
         }
     }
     
@@ -211,10 +217,11 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                         //checking if the response contains an image
                         if let imageData = data {
                             //convert that Data into an image
-                            let image = UIImage(data: imageData)
+                            let downloadImage = UIImage(data: imageData)
                             //view must be used from main thread only, see https://developer.apple.com/documentation/code_diagnostics/main_thread_checker
                             DispatchQueue.main.async {
-                                self.dishView.image = image
+                                self.dishView.image = downloadImage
+                                self.adjustdishThumbnailCollectionViewQR(dishURL: metadataObj.stringValue!, dishImage: downloadImage!)
                             }
                         } else {
                             print("Couldn't get image: Image is nil")
@@ -229,10 +236,25 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         }
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    func adjustdishThumbnailCollectionViewQR(dishURL: String, dishImage: UIImage) {
+        self.dishThumbnailCollectionViewQR.reloadData()
+        dic.append(CellContent(url: dishURL, image: dishImage))
     }
-
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+    }
+    /*
+    // Get the new view controller using segue.destinationViewController.
+    // Pass the selected object to the new view controller.
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let tabBarController = segue.destination as! UITabBarController
+        let arModeController = tabBarController.viewControllers?.first as? ARmodeViewController
+        arModeController?.dicFromQR = dic
+        //let bookController = navController?.viewControllers.first as? BookViewController
+        //bookController?.bookName = "小王子和彼得潘的那些年"
+    }
+    */
+    
 }
 

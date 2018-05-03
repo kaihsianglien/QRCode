@@ -12,6 +12,7 @@
 		9C2736E92089D5310053277B /* VirtualObjectLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2736E82089D5310053277B /* VirtualObjectLoader.swift */; };
 		9C2736EB2089D56C0053277B /* VirtualObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2736EA2089D56C0053277B /* VirtualObject.swift */; };
 		9C2A94532097E3DA00C5310C /* dishThumbnailCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2A94522097E3DA00C5310C /* dishThumbnailCollectionViewCell.swift */; };
+		9C2A9475209B112200C5310C /* MediaOfDish.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2A9474209B112200C5310C /* MediaOfDish.swift */; };
 		9C32ACEB20821552006A1307 /* AWSMobileClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C32ACEA20821552006A1307 /* AWSMobileClient.framework */; };
 		9C32ACED20821578006A1307 /* AWSCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C32ACEC20821578006A1307 /* AWSCore.framework */; };
 		9C32ACEF2082157D006A1307 /* AWSAuthCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C32ACEE2082157D006A1307 /* AWSAuthCore.framework */; };
@@ -32,6 +33,7 @@
 		9C2736E82089D5310053277B /* VirtualObjectLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObjectLoader.swift; sourceTree = "<group>"; };
 		9C2736EA2089D56C0053277B /* VirtualObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VirtualObject.swift; path = /Users/lien/Developer/QRCode/QRCode/VirtualObject.swift; sourceTree = "<absolute>"; };
 		9C2A94522097E3DA00C5310C /* dishThumbnailCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dishThumbnailCollectionViewCell.swift; sourceTree = "<group>"; };
+		9C2A9474209B112200C5310C /* MediaOfDish.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaOfDish.swift; sourceTree = "<group>"; };
 		9C32ACEA20821552006A1307 /* AWSMobileClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSMobileClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C32ACEC20821578006A1307 /* AWSCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C32ACEE2082157D006A1307 /* AWSAuthCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSAuthCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -91,6 +93,7 @@
 				9C9B9DB2207891B0004F6322 /* QRcodeViewController.swift */,
 				9CC8E6F92084A26300D5DEA4 /* ARmodeViewController.swift */,
 				9C2736EA2089D56C0053277B /* VirtualObject.swift */,
+				9C2A9474209B112200C5310C /* MediaOfDish.swift */,
 				9C2A94522097E3DA00C5310C /* dishThumbnailCollectionViewCell.swift */,
 				9C2736E82089D5310053277B /* VirtualObjectLoader.swift */,
 				9CD682922085A40A00507F92 /* art.scnassets */,
@@ -244,6 +247,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9C0EE8492092D1AD0038928D /* AboutViewController.swift in Sources */,
+				9C2A9475209B112200C5310C /* MediaOfDish.swift in Sources */,
 				9C2736E92089D5310053277B /* VirtualObjectLoader.swift in Sources */,
 				9C9B9DB3207891B0004F6322 /* QRcodeViewController.swift in Sources */,
 				9C2A94532097E3DA00C5310C /* dishThumbnailCollectionViewCell.swift in Sources */,

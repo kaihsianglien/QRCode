@@ -2,9 +2,12 @@ import Foundation
 import SceneKit
 import ARKit
 
+struct CellContent {
+    let url: String
+    let image: UIImage
+}
+
 class VirtualObject: SCNReferenceNode {
-    
-    
     
     /// - Tag: AdjustOntoPlaneAnchor
     func adjustOntoPlaneAnchor(_ anchor: ARPlaneAnchor, using node: SCNNode) {
