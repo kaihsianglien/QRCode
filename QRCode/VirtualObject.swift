@@ -19,27 +19,41 @@ protocol VirtualObjectARDelegate: class {
 
 let dataModelDidUpdateNotification = "dataModelDidUpdateNotification"
 
-var imageUrlStringType = "" {
-    didSet {
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
-    }
-}
+
 
 class VirtualObject {
- 
+
     weak var delegateQR: VirtualObjectQRDelegate?
-     weak var delegateAR: VirtualObjectARDelegate?
+    weak var delegateAR: VirtualObjectARDelegate?
     
     static var sharedInstance = VirtualObject()
-
-    func getDataOfDishes() -> String {
-        //print("getDataOfDishes", imageUrlStringType)
-        return imageUrlStringType
+    
+    var dishes = [CellContent]() {
+        didSet {
+            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
+        }
     }
     
-    var dishes = [CellContent]()
+    func getDataOfDishes() -> (String, UIImage) {
+        return (imageUrlStringType, downloadImage)
+    }
+    
+    var imageUrlStringType = ""
+    var downloadImage = UIImage()
+    
+    private (set) var dataTest: String? {
+        didSet {
+            NotificationCenter.default.post(name:
+                NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
+        }
+    }
+    
+    func requestData() {
+        self.dataTest = imageUrlStringType
+    }
     
     init() {
+        
     }
     
     func downloadDataDirectMethod(metadataObj: AVMetadataMachineReadableCodeObject) {
@@ -61,14 +75,14 @@ class VirtualObject {
                         //checking if the response contains an image
                         if let imageData = data {
                             //convert that Data into an image
-                            let downloadImage = UIImage(data: imageData)
+                            self.downloadImage = UIImage(data: imageData)!
                             //view must be used from main thread only, see https://developer.apple.com/documentation/code_diagnostics/main_thread_checker
                             DispatchQueue.main.async {
-                                self.dishes.append(CellContent(url: imageUrlStringType, image: downloadImage!))
-                                self.delegateQR?.virtualObjectToQRcodeDelegate(url: imageUrlStringType, img: downloadImage!)
-                                self.delegateAR?.virtualObjectToARmodeDelegate(url: imageUrlStringType, img: downloadImage!)
+                                self.dishes.append(CellContent(url: self.imageUrlStringType, image: self.downloadImage))
+                                self.delegateQR?.virtualObjectToQRcodeDelegate(url: self.imageUrlStringType, img: self.downloadImage)
+                                self.delegateAR?.virtualObjectToARmodeDelegate(url: self.imageUrlStringType, img: self.downloadImage)
                                 
-                                //self.dataOfDishes = imageUrlStringType
+                                self.dataTest = self.imageUrlStringType
                             }
                         } else {
                             print("Couldn't get image: Image is nil")

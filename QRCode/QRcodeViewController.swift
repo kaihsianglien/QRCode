@@ -8,18 +8,25 @@ import AWSS3
 class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, UICollectionViewDelegate, UICollectionViewDataSource, VirtualObjectQRDelegate {
     
     var food = VirtualObject()
+    var abc = VirtualObject.init()
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return food.dishes.count
+        //return food.dishes.count
+        //return abc.sharedInstance.dishes.count
+        //return abc.dishes.count
+        return VirtualObject.sharedInstance.dishes.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "dishThumbnailCell", for: indexPath) as! dishThumbnailCollectionViewCell
-        cell.dishThumbnailImageView.image = food.dishes[indexPath.row].image
+        //cell.dishThumbnailImageView.image = food.dishes[indexPath.row].image
+        //cell.dishThumbnailImageView.image = VirtualObject.sharedInstance.dishes[indexPath.row].image
+        //cell.dishThumbnailImageView.image = abc.dishes[indexPath.row].image
+        cell.dishThumbnailImageView.image = VirtualObject.sharedInstance.dishes[indexPath.row].image
         cell.backgroundColor = UIColor.gray
         return cell
     }
@@ -37,15 +44,19 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         NotificationCenter.default.addObserver(self, selector: #selector(getDataUpdate), name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
+        VirtualObject.sharedInstance.requestData()
+        
         food.delegateQR = self
         modifyComponents()
         createSession()
     }
     
-    @objc private func getDataUpdate() {
-        let dataOfDishes = VirtualObject.sharedInstance.getDataOfDishes()
-        print("getDataUpdate", dataOfDishes)
+    @objc private func getDataUpdate() {   
+        self.dishThumbnailCollectionViewQR.reloadData()
+        
+        self.dishView.image = VirtualObject.sharedInstance.dishes.last?.image
     }
     
     func modifyComponents() {
@@ -130,8 +141,9 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                     //AWS download function
                     //food.downloadDataAWS(dishName: downloadUrl)
                     
-                    //this is the direct download without AWS
-                    food.downloadDataDirectMethod(metadataObj: metadataObj)
+                    //direct download function without AWS
+                    //food.downloadDataDirectMethod(metadataObj: metadataObj)
+                    VirtualObject.sharedInstance.downloadDataDirectMethod(metadataObj: metadataObj)
                     
                     //add url to array since it is scanned and downloaded
                     dishUrlStringArray.append(downloadUrl)
@@ -141,8 +153,8 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
     }
     
     func virtualObjectToQRcodeDelegate(url:String, img: UIImage) {
-        self.dishView.image = img
-        self.dishThumbnailCollectionViewQR.reloadData()
+        //self.dishView.image = img
+        //self.dishThumbnailCollectionViewQR.reloadData()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
