@@ -1,9 +1,11 @@
+/*
 import Foundation
 import UIKit
 
-struct MediaOfDish {
+struct CellContent {
     
     let dishUrl: String
     let dishImage: UIImage
     
 }
+*/

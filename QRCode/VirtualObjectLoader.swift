@@ -2,7 +2,7 @@ import Foundation
 
 class VirtualObjectLoader {
 
-    private(set) var loadedObjects = [VirtualObject]()
+    //private(set) var loadedObjects = [VirtualObject]()
 
     
 }

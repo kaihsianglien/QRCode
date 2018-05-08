@@ -3,21 +3,29 @@
 import UIKit
 import ARKit
 
-class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, VirtualObjectARDelegate {
     
-    var dicFromQR = [CellContent]()
+    //var dicFromQR = [CellContent]()
+    var test = 0;
+
+    var food = VirtualObject()
+    
+    let images = ["book1", "book2", "book3", "book4", "book5", "book6", "book7", "book8", "book9", "book10", "book11", "book12", "book13"]
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return dicFromQR.count
+        print("aaa", food.dishes.count)
+        //return food.dishes.count
+        return images.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "dishThumbnailCell", for: indexPath) as! dishThumbnailCollectionViewCell
-        cell.dishThumbnailImageView.image = dicFromQR[indexPath.row].image
+        //cell.dishThumbnailImageView.image = food.dishes[indexPath.row].image
+        cell.dishThumbnailImageView.image = UIImage(named: images[indexPath.row])
         cell.backgroundColor = UIColor.gray
         return cell
     }
@@ -49,13 +57,26 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         //sceneView.scene = scene
         configureLighting()
         addTapGestureToSceneView()
-        //print(dicFromQR.count)
-        self.dishThumbnailCollectionViewAR.reloadData()
+        
+        print("bbb", food.dishes.count)
+        print("test", test)
+        
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        food.delegateAR = self
         setUpSceneView()
+        //self.dishThumbnailCollectionViewAR.reloadData()
+        print("ccc", food.dishes.count)
+        print(food.delegateAR)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        print("ddd", food.dishes.count)
     }
     
     func setUpSceneView() {
@@ -71,6 +92,14 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
     }
     
+    func virtualObjectToARmodeDelegate(url:String, img: UIImage) {
+        print(img)
+        print("AR activated when scan QR")
+        test = food.dishes.count
+        self.dishThumbnailCollectionViewAR.reloadData()
+    }
+    
+    /*
     //let virtualObjectLoader = VirtualObjectLoader()
     //Once enough ARAnchor(object represents physical location & orientation in 3D space) is added renderer will be called
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
@@ -99,7 +128,7 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         
         node.addChildNode(planeNode)
     }
-    
+    */
     //expand horizontal planes
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         //

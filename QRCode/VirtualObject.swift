@@ -1,12 +1,135 @@
 import Foundation
 import SceneKit
 import ARKit
+import AWSCore
+import AWSS3
 
 struct CellContent {
     let url: String
     let image: UIImage
 }
 
+protocol VirtualObjectQRDelegate: class {
+    func virtualObjectToQRcodeDelegate(url: String, img: UIImage)
+}
+
+protocol VirtualObjectARDelegate: class {
+    func virtualObjectToARmodeDelegate(url: String, img: UIImage)
+}
+
+let dataModelDidUpdateNotification = "dataModelDidUpdateNotification"
+
+var imageUrlStringType = "" {
+    didSet {
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
+    }
+}
+
+class VirtualObject {
+ 
+    weak var delegateQR: VirtualObjectQRDelegate?
+     weak var delegateAR: VirtualObjectARDelegate?
+    
+    static var sharedInstance = VirtualObject()
+
+    func getDataOfDishes() -> String {
+        //print("getDataOfDishes", imageUrlStringType)
+        return imageUrlStringType
+    }
+    
+    var dishes = [CellContent]()
+    
+    init() {
+    }
+    
+    func downloadDataDirectMethod(metadataObj: AVMetadataMachineReadableCodeObject) {
+        imageUrlStringType = metadataObj.stringValue!
+        if let URL_IMAGE = URL(string: imageUrlStringType){
+            
+            // Creating a session object with the default configuration.
+            // You can read more about it here https://developer.apple.com/reference/foundation/urlsessionconfiguration
+            let session = URLSession(configuration: .default)
+            
+            // Define a download task. The download task will download the contents of the URL as a Data object
+            let getImageFromUrl = session.dataTask(with: URL_IMAGE) { (data, response, error) in
+                // The download has finished. if there is any error
+                if let e = error {
+                    print("Error Occurred: \(e)")
+                } else {
+                    // No errors found.
+                    if (response as? HTTPURLResponse) != nil {
+                        //checking if the response contains an image
+                        if let imageData = data {
+                            //convert that Data into an image
+                            let downloadImage = UIImage(data: imageData)
+                            //view must be used from main thread only, see https://developer.apple.com/documentation/code_diagnostics/main_thread_checker
+                            DispatchQueue.main.async {
+                                self.dishes.append(CellContent(url: imageUrlStringType, image: downloadImage!))
+                                self.delegateQR?.virtualObjectToQRcodeDelegate(url: imageUrlStringType, img: downloadImage!)
+                                self.delegateAR?.virtualObjectToARmodeDelegate(url: imageUrlStringType, img: downloadImage!)
+                                
+                                //self.dataOfDishes = imageUrlStringType
+                            }
+                        } else {
+                            print("Couldn't get image: Image is nil")
+                        }
+                    } else {
+                        print("Couldn't get response code for some reason")
+                    }
+                }
+            }
+            //starting the download task
+            getImageFromUrl.resume()
+        }
+    }
+    
+    func downloadDataAWS(dishName: String) {
+        let expression = AWSS3TransferUtilityDownloadExpression()
+        expression.progressBlock = {(task, progress) in DispatchQueue.main.async(execute: {
+            // Do something e.g. Update a progress bar.
+            //Reference to property 'linkLabel' in closure requires explicit 'self.' to make capture semantics explicit
+        })
+        }
+        
+        var downloadImage = UIImage()
+        
+        var completionHandler: AWSS3TransferUtilityDownloadCompletionHandlerBlock?
+        completionHandler = { (task, URL, data, error) -> Void in
+            DispatchQueue.main.async(execute: {
+                if let error = error {
+                    print("localizedDescription: \(error.localizedDescription)")
+                    NSLog("Failed with error: \(error)")
+                }
+                else{
+                    downloadImage = UIImage(data: data!)!
+                    
+                    self.dishes.append(CellContent(url: dishName, image: downloadImage))
+                    self.delegateQR?.virtualObjectToQRcodeDelegate(url: dishName, img: downloadImage)
+                    self.delegateAR?.virtualObjectToARmodeDelegate(url: dishName, img: downloadImage)
+                }
+            })
+        }
+        let transferUtility = AWSS3TransferUtility.default()
+        transferUtility.downloadData(
+            fromBucket: "restaurantdishphoto",
+            //beware the filetype is fixed to jpg format
+            key: dishName+".jpg",
+            expression: expression,
+            completionHandler: completionHandler
+            ).continueWith {
+                (task) -> AnyObject! in if let error = task.error {
+                    print("Error: \(error.localizedDescription)")
+                }
+                
+                if let _ = task.result {
+                    // Do something with downloadTask.
+                }
+                return nil
+        }
+    }
+}
+
+/*
 class VirtualObject: SCNReferenceNode {
     
     /// - Tag: AdjustOntoPlaneAnchor
@@ -73,5 +196,5 @@ extension VirtualObject {
         return existingObjectContainingNode(parent)
     }
 }
-
+*/
 
