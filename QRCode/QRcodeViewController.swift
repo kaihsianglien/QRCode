@@ -5,31 +5,31 @@ import AVFoundation
 import AWSCore
 import AWSS3
 
-class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, UICollectionViewDelegate, UICollectionViewDataSource, VirtualObjectQRDelegate {
-    
+class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+    //delegate for model, should be remove later
     var food = VirtualObject()
-    var abc = VirtualObject.init()
 
+    //set up collectionView and bind cell
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        //return food.dishes.count
-        //return abc.sharedInstance.dishes.count
-        //return abc.dishes.count
         return VirtualObject.sharedInstance.dishes.count
     }
-    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "dishThumbnailCell", for: indexPath) as! dishThumbnailCollectionViewCell
-        //cell.dishThumbnailImageView.image = food.dishes[indexPath.row].image
-        //cell.dishThumbnailImageView.image = VirtualObject.sharedInstance.dishes[indexPath.row].image
-        //cell.dishThumbnailImageView.image = abc.dishes[indexPath.row].image
         cell.dishThumbnailImageView.image = VirtualObject.sharedInstance.dishes[indexPath.row].image
-        cell.backgroundColor = UIColor.gray
         return cell
     }
+    
+    /*
+    func collectionView(collectionView: UICollectionView, moveItemAtIndexPath sourceIndexPath: NSIndexPath,toIndexPath destinationIndexPath: NSIndexPath) {
+    // swap values if sorce and destination
+    let temp = characterArray[sourceIndexPath.row]
+    characterArray[sourceIndexPath.row] = characterArray[destinationIndexPath.row]
+    characterArray[destinationIndexPath.row] = temp
+    }
+    */
     
     var captureSession = AVCaptureSession()
     var videoPreviewLayer: AVCaptureVideoPreviewLayer?
@@ -47,15 +47,15 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         
         NotificationCenter.default.addObserver(self, selector: #selector(getDataUpdate), name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
         VirtualObject.sharedInstance.requestData()
-        
-        food.delegateQR = self
         modifyComponents()
         createSession()
+        addTapGestureToView()
     }
+    
+    
     
     @objc private func getDataUpdate() {   
         self.dishThumbnailCollectionViewQR.reloadData()
-        
         self.dishView.image = VirtualObject.sharedInstance.dishes.last?.image
     }
     
@@ -138,11 +138,7 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                 //linkLabel.text = downloadUrl
                 //skip processing the same QR code, only respond with code not in database
                 if(!dishUrlStringArray.contains(downloadUrl)) {
-                    //AWS download function
                     //food.downloadDataAWS(dishName: downloadUrl)
-                    
-                    //direct download function without AWS
-                    //food.downloadDataDirectMethod(metadataObj: metadataObj)
                     VirtualObject.sharedInstance.downloadDataDirectMethod(metadataObj: metadataObj)
                     
                     //add url to array since it is scanned and downloaded
@@ -152,9 +148,30 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         }
     }
     
-    func virtualObjectToQRcodeDelegate(url:String, img: UIImage) {
-        //self.dishView.image = img
-        //self.dishThumbnailCollectionViewQR.reloadData()
+    func addTapGestureToView() {
+        let collectionViewTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(QRcodeViewController.chooseCellInCollectionView(withGestureRecognizer:)))
+        dishThumbnailCollectionViewQR.addGestureRecognizer(collectionViewTapGestureRecognizer)
+        
+        let collectionViewSwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(QRcodeViewController.deleteCellInCollectionView(withGestureRecognizer:)))
+        collectionViewSwipeGestureRecognizer.direction = UISwipeGestureRecognizerDirection.up
+        dishThumbnailCollectionViewQR.addGestureRecognizer(collectionViewSwipeGestureRecognizer)
+    }
+    
+    @objc func chooseCellInCollectionView(withGestureRecognizer recognizer: UIGestureRecognizer) {
+        let tapLocation = recognizer.location(in: dishThumbnailCollectionViewQR)
+        if let indexPath = dishThumbnailCollectionViewQR.indexPathForItem(at: tapLocation) {
+            dishView.image = VirtualObject.sharedInstance.dishes[indexPath.row].image
+        }
+    }
+    
+    @objc func deleteCellInCollectionView(withGestureRecognizer recognizer: UISwipeGestureRecognizer) {
+        let tapLocation = recognizer.location(in: dishThumbnailCollectionViewQR)
+        if let indexPath = dishThumbnailCollectionViewQR.indexPathForItem(at: tapLocation) {
+            VirtualObject.sharedInstance.dishes.remove(at: indexPath.row)
+            dishThumbnailCollectionViewQR.deleteItems(at: [indexPath])
+            
+            dishUrlStringArray.remove(at: indexPath.row)
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {

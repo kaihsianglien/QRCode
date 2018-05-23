@@ -9,22 +9,11 @@ struct CellContent {
     let image: UIImage
 }
 
-protocol VirtualObjectQRDelegate: class {
-    func virtualObjectToQRcodeDelegate(url: String, img: UIImage)
-}
-
-protocol VirtualObjectARDelegate: class {
-    func virtualObjectToARmodeDelegate(url: String, img: UIImage)
-}
-
 let dataModelDidUpdateNotification = "dataModelDidUpdateNotification"
 
 
 
 class VirtualObject {
-
-    weak var delegateQR: VirtualObjectQRDelegate?
-    weak var delegateAR: VirtualObjectARDelegate?
     
     static var sharedInstance = VirtualObject()
     
@@ -37,6 +26,8 @@ class VirtualObject {
     func getDataOfDishes() -> (String, UIImage) {
         return (imageUrlStringType, downloadImage)
     }
+    
+    
     
     var imageUrlStringType = ""
     var downloadImage = UIImage()
@@ -53,6 +44,10 @@ class VirtualObject {
     }
     
     init() {
+        
+    }
+    
+    func addDishes() {
         
     }
     
@@ -79,8 +74,6 @@ class VirtualObject {
                             //view must be used from main thread only, see https://developer.apple.com/documentation/code_diagnostics/main_thread_checker
                             DispatchQueue.main.async {
                                 self.dishes.append(CellContent(url: self.imageUrlStringType, image: self.downloadImage))
-                                self.delegateQR?.virtualObjectToQRcodeDelegate(url: self.imageUrlStringType, img: self.downloadImage)
-                                self.delegateAR?.virtualObjectToARmodeDelegate(url: self.imageUrlStringType, img: self.downloadImage)
                                 
                                 self.dataTest = self.imageUrlStringType
                             }
@@ -118,8 +111,6 @@ class VirtualObject {
                     downloadImage = UIImage(data: data!)!
                     
                     self.dishes.append(CellContent(url: dishName, image: downloadImage))
-                    self.delegateQR?.virtualObjectToQRcodeDelegate(url: dishName, img: downloadImage)
-                    self.delegateAR?.virtualObjectToARmodeDelegate(url: dishName, img: downloadImage)
                 }
             })
         }

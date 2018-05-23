@@ -3,39 +3,29 @@
 import UIKit
 import ARKit
 
-class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, VirtualObjectARDelegate {
-    
-    //var dicFromQR = [CellContent]()
-    var test = 0;
+class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 
     var food = VirtualObject()
     
-    let images = ["book1", "book2", "book3", "book4", "book5", "book6", "book7", "book8", "book9", "book10", "book11", "book12", "book13"]
+    //Create a session configuration
+    let configuration = ARWorldTrackingConfiguration()
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        //return food.dishes.count
-        //return images.count
         return VirtualObject.sharedInstance.dishes.count
     }
-    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "dishThumbnailCell", for: indexPath) as! dishThumbnailCollectionViewCell
-        //cell.dishThumbnailImageView.image = food.dishes[indexPath.row].image
-        //cell.dishThumbnailImageView.image = UIImage(named: images[indexPath.row])
         cell.dishThumbnailImageView.image = VirtualObject.sharedInstance.dishes[indexPath.row].image
-        cell.backgroundColor = UIColor.gray
         return cell
     }
     
     @IBOutlet weak var sceneView: ARSCNView!
     @IBOutlet var didTapScreen: UITapGestureRecognizer!
     @IBOutlet weak var dishThumbnailCollectionViewAR: UICollectionView!
-    
-    
+    @IBOutlet weak var arStatus: UILabel!
     @IBAction func testButton(_ sender: Any) {
         self.restartSession()
     }
@@ -47,41 +37,40 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
             node.removeFromParentNode()
         }
         sceneView.session.run(ARWorldTrackingConfiguration(), options: [.resetTracking, .removeExistingAnchors])
-        let scene = SCNScene(named: "art.scnassets/airplane.scn")!
+        let scene = SCNScene(named: "art.scnassets/ship.scn")!
         sceneView.scene = scene
         */
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //let scene = SCNScene(named: "art.scnassets/airplane.scn")!
-        //sceneView.scene = scene
         
         NotificationCenter.default.addObserver(self, selector: #selector(getDataUpdate), name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
         VirtualObject.sharedInstance.requestData()
+        /*
+        if let sceneTest = SCNScene(named: "art.scnassets/book/book.scn") {
+            //sceneTest.position =SCNVector3(0,0, -0.2)
+            sceneView.scene = sceneTest
+        } else {
+            print("failed sceneTest")
+        }
+        */
         
         configureLighting()
-        addTapGestureToSceneView()
+        setUpSceneView()
+        addTapGestureToView()
     }
     
-    @objc private func getDataUpdate() {
+    @objc func getDataUpdate() {
         self.dishThumbnailCollectionViewAR.reloadData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        food.delegateAR = self
-        setUpSceneView()
-        //self.dishThumbnailCollectionViewAR.reloadData()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+        sceneView.session.run(configuration, options: ARSession.RunOptions.resetTracking)
     }
     
     func setUpSceneView() {
-        //Create a session configuration
-        let configuration = ARWorldTrackingConfiguration()
         //detect the horizontal plane and added into sceneView’s session.
         configuration.planeDetection = .horizontal
         //Run the view's session
@@ -91,22 +80,11 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         //show feature points in the world
         sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
     }
-    
-    func virtualObjectToARmodeDelegate(url:String, img: UIImage) {
-        //test = food.dishes.count
-        //self.dishThumbnailCollectionViewAR.reloadData()
-    }
-    
-    /*
-    //let virtualObjectLoader = VirtualObjectLoader()
+
     //Once enough ARAnchor(object represents physical location & orientation in 3D space) is added renderer will be called
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         //
         guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
-        
-        for object in VirtualObjectLoader().loadedObjects {
-            object.adjustOntoPlaneAnchor(planeAnchor, using: node)
-        }
         
         //create an SCNPlane to visualize the ARPlaneAnchor with x, z and make the color transparentLightBlue
         let width = CGFloat(planeAnchor.extent.x)
@@ -126,7 +104,7 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         
         node.addChildNode(planeNode)
     }
-    */
+    
     //expand horizontal planes
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         //
@@ -153,9 +131,22 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         sceneView.automaticallyUpdatesLighting = true
     }
     
-    func addTapGestureToSceneView() {
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ARmodeViewController.addObjectToSceneView(withGestureRecognizer:)))
-        sceneView.addGestureRecognizer(tapGestureRecognizer)
+    func addTapGestureToView() {
+        
+        
+        let collectionViewTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(QRcodeViewController.chooseCellInCollectionView(withGestureRecognizer:)))
+        dishThumbnailCollectionViewAR.addGestureRecognizer(collectionViewTapGestureRecognizer)
+        
+        let sceneViewTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ARmodeViewController.addObjectToSceneView(withGestureRecognizer:)))
+        sceneView.addGestureRecognizer(sceneViewTapGestureRecognizer)
+    }
+    
+    @objc func chooseCellInCollectionView(withGestureRecognizer recognizer: UIGestureRecognizer) {
+        let tapLocation = recognizer.location(in: dishThumbnailCollectionViewAR)
+        if let indexPath = dishThumbnailCollectionViewAR.indexPathForItem(at: tapLocation) {
+            //dishView.image = VirtualObject.sharedInstance.dishes[indexPath.row].image
+            //project selected image's AR at sceneView
+        }
     }
     
     var objectAlreadyExist = false
@@ -169,9 +160,11 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         let y = translation.y
         let z = translation.z
         
-        guard let objectScene = SCNScene(named: "art.scnassets/ship.scn"),
-            let objectNode = objectScene.rootNode.childNode(withName: "ship", recursively: false)
+        guard let objectScene = SCNScene(named: "art.scnassets/burger/burger.scn"),
+            let objectNode = objectScene.rootNode.childNode(withName: "burger", recursively: false)
             else { return }
+        
+        print("object added")
         
         //place object if not on table yet
         if (objectAlreadyExist != true) {
@@ -180,10 +173,14 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
             objectAlreadyExist = true
         //delete object if it it exist
         } else {
+            sceneView.scene.rootNode.childNode(withName: "burger", recursively: true)?.removeFromParentNode()
+            objectAlreadyExist = false
+            /*
             sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
                 node.removeFromParentNode()
             objectAlreadyExist = false
             }
+            */
         }
     }
     
@@ -192,11 +189,7 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         // Pause the view's session
         sceneView.session.pause()
     }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Release any cached data, images, etc that aren't in use.
-    }
+
     
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user

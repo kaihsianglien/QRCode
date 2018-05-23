@@ -160,6 +160,7 @@
                     </view>
                     <tabBarItem key="tabBarItem" title="ARmode" id="3XU-5F-N5r"/>
                     <connections>
+                        <outlet property="arStatus" destination="ifV-I0-ATh" id="dW2-Gv-gCv"/>
                         <outlet property="didTapScreen" destination="1aQ-bb-Mhr" id="cV7-ta-LQE"/>
                         <outlet property="dishThumbnailCollectionViewAR" destination="E82-V0-Vc0" id="Rn0-2v-Ouf"/>
                         <outlet property="sceneView" destination="BHQ-lG-GI5" id="Plu-me-GeE"/>
