@@ -6,6 +6,7 @@ import ARKit
 class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 
     var food = VirtualObject()
+    var chosenObjectId = ""
     
     //Create a session configuration
     let configuration = ARWorldTrackingConfiguration()
@@ -46,7 +47,6 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         super.viewDidLoad()
         
         NotificationCenter.default.addObserver(self, selector: #selector(getDataUpdate), name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
-        VirtualObject.sharedInstance.requestData()
         /*
         if let sceneTest = SCNScene(named: "art.scnassets/book/book.scn") {
             //sceneTest.position =SCNVector3(0,0, -0.2)
@@ -68,6 +68,7 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         sceneView.session.run(configuration, options: ARSession.RunOptions.resetTracking)
+        self.dishThumbnailCollectionViewAR.reloadData()
     }
     
     func setUpSceneView() {
@@ -144,8 +145,10 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
     @objc func chooseCellInCollectionView(withGestureRecognizer recognizer: UIGestureRecognizer) {
         let tapLocation = recognizer.location(in: dishThumbnailCollectionViewAR)
         if let indexPath = dishThumbnailCollectionViewAR.indexPathForItem(at: tapLocation) {
-            //dishView.image = VirtualObject.sharedInstance.dishes[indexPath.row].image
+            self.chosenObjectId = VirtualObject.sharedInstance.dishes[indexPath.row].url
+            //print(self.chosenObjectId)
             //project selected image's AR at sceneView
+            
         }
     }
     
@@ -160,20 +163,28 @@ class ARmodeViewController: UIViewController, ARSCNViewDelegate, UICollectionVie
         let y = translation.y
         let z = translation.z
         
-        guard let objectScene = SCNScene(named: "art.scnassets/burger/burger.scn"),
-            let objectNode = objectScene.rootNode.childNode(withName: "burger", recursively: false)
-            else { return }
+        let tmpURL = FileManager.default.temporaryDirectory
+        let id = chosenObjectId + ".scn"
+        let targetLocation = tmpURL.appendingPathComponent(id)
         
-        print("object added")
+        let objectScene = try? SCNScene(url: targetLocation, options: nil)
+        let objectNode = objectScene!.rootNode.childNode(withName: chosenObjectId, recursively: false)
+        /*
+        guard let objectScene = SCNScene(named: "art.scnassets/burger/burger.scn"),
+            let objectNode = objectScene.rootNode.childNode(withName: "steak", recursively: false)
+            else { return }
+        */
         
         //place object if not on table yet
         if (objectAlreadyExist != true) {
-            objectNode.position = SCNVector3(x,y,z)
-            sceneView.scene.rootNode.addChildNode(objectNode)
+            objectNode?.position = SCNVector3(x,y,z)
+            sceneView.scene.rootNode.addChildNode(objectNode!)
+            print("add " + chosenObjectId)
             objectAlreadyExist = true
         //delete object if it it exist
         } else {
-            sceneView.scene.rootNode.childNode(withName: "burger", recursively: true)?.removeFromParentNode()
+            sceneView.scene.rootNode.childNode(withName: chosenObjectId, recursively: true)?.removeFromParentNode()
+            print("drop " + chosenObjectId)
             objectAlreadyExist = false
             /*
             sceneView.scene.rootNode.enumerateChildNodes { (node, _) in

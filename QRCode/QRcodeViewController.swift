@@ -6,8 +6,6 @@ import AWSCore
 import AWSS3
 
 class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
-    //delegate for model, should be remove later
-    var food = VirtualObject()
 
     //set up collectionView and bind cell
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -46,13 +44,10 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         super.viewDidLoad()
         
         NotificationCenter.default.addObserver(self, selector: #selector(getDataUpdate), name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
-        VirtualObject.sharedInstance.requestData()
         modifyComponents()
         createSession()
         addTapGestureToView()
     }
-    
-    
     
     @objc private func getDataUpdate() {   
         self.dishThumbnailCollectionViewQR.reloadData()
@@ -119,7 +114,6 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
     }
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        var downloadImage = UIImage()
         // check metadataObjects arrays as it should at least has one object of QR code
         if metadataObjects.count == 0 {
             qrCodeFrameView?.frame = CGRect.zero
@@ -139,8 +133,8 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
                 //skip processing the same QR code, only respond with code not in database
                 if(!dishUrlStringArray.contains(downloadUrl)) {
                     //food.downloadDataAWS(dishName: downloadUrl)
-                    VirtualObject.sharedInstance.downloadDataDirectMethod(metadataObj: metadataObj)
-                    
+                    //VirtualObject.sharedInstance.downloadDataFromServer(url: downloadUrl)
+                    VirtualObject.sharedInstance.handleUrl(url: downloadUrl)
                     //add url to array since it is scanned and downloaded
                     dishUrlStringArray.append(downloadUrl)
                 }
@@ -161,6 +155,13 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         let tapLocation = recognizer.location(in: dishThumbnailCollectionViewQR)
         if let indexPath = dishThumbnailCollectionViewQR.indexPathForItem(at: tapLocation) {
             dishView.image = VirtualObject.sharedInstance.dishes[indexPath.row].image
+            /*
+            if let data = VirtualObject.sharedInstance.loadDataFromDirectory(fileName: "steak_diffuse.jpg") {
+                dishView.image = UIImage(data: data)
+            } else {
+                print("file is nil")
+            }
+            */
         }
     }
     
@@ -168,8 +169,8 @@ class QRcodeViewController: UIViewController, AVCaptureMetadataOutputObjectsDele
         let tapLocation = recognizer.location(in: dishThumbnailCollectionViewQR)
         if let indexPath = dishThumbnailCollectionViewQR.indexPathForItem(at: tapLocation) {
             VirtualObject.sharedInstance.dishes.remove(at: indexPath.row)
-            dishThumbnailCollectionViewQR.deleteItems(at: [indexPath])
-            
+            print(dishThumbnailCollectionViewQR)
+
             dishUrlStringArray.remove(at: indexPath.row)
         }
     }

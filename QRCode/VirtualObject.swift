@@ -5,13 +5,19 @@ import AWSCore
 import AWSS3
 
 struct CellContent {
-    let url: String
-    let image: UIImage
+    var url: String
+    var image: UIImage
+    var scnObject: Data
+    var renderPic: UIImage
+    
+    mutating func addUrl(url: String) {
+        self.url = url
+    }
 }
 
+
+
 let dataModelDidUpdateNotification = "dataModelDidUpdateNotification"
-
-
 
 class VirtualObject {
     
@@ -19,77 +25,126 @@ class VirtualObject {
     
     var dishes = [CellContent]() {
         didSet {
-            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
         }
     }
     
-    func getDataOfDishes() -> (String, UIImage) {
-        return (imageUrlStringType, downloadImage)
-    }
+    var dlUrl = ""
+    var dlImage = UIImage()
+    var dlScnObject = Data()
+    var dlRenderPic = UIImage()
     
-    
-    
-    var imageUrlStringType = ""
-    var downloadImage = UIImage()
-    
-    private (set) var dataTest: String? {
-        didSet {
-            NotificationCenter.default.post(name:
-                NSNotification.Name(rawValue: dataModelDidUpdateNotification), object: nil)
-        }
-    }
-    
-    func requestData() {
-        self.dataTest = imageUrlStringType
-    }
-    
-    init() {
+    func handleUrl(url: String) {
+        /*
+        let start = url.index(url.startIndex, offsetBy: serverAddress.count)
+        let end = url.index(url.endIndex, offsetBy: -1)
+        let range = start ..< end
+        let itemName = url[range]
+        */
+        let serverAddress = "http://www-scf.usc.edu/~klien/menu/"
+        let documentPath = url + "/"
+        let urlImage = serverAddress + documentPath + url + ".jpg"
+        let urlScnObject = serverAddress + documentPath + url + ".scn"
+        let urlDiffuse = serverAddress + documentPath + url + "_diffuse.jpg"
         
-    }
-    
-    func addDishes() {
+        self.dlUrl = url
         
+        var arrayForUrls  = [(url: String, fileType: String)]()
+        arrayForUrls.append((urlImage, "urlImage"))
+        arrayForUrls.append((urlScnObject, "urlScnObject"))
+        arrayForUrls.append((urlDiffuse, "urlDiffuse"))
+        
+        self.downloadDataFromServer(arrayForUrls: arrayForUrls)
     }
     
-    func downloadDataDirectMethod(metadataObj: AVMetadataMachineReadableCodeObject) {
-        imageUrlStringType = metadataObj.stringValue!
-        if let URL_IMAGE = URL(string: imageUrlStringType){
-            
-            // Creating a session object with the default configuration.
-            // You can read more about it here https://developer.apple.com/reference/foundation/urlsessionconfiguration
-            let session = URLSession(configuration: .default)
-            
+    func downloadDataFromServer(arrayForUrls: [(url: String, fileType: String)]) {
+        // Read more about it here https://developer.apple.com/reference/foundation/urlsessionconfiguration
+        let session = URLSession(configuration: .default)
+        let group = DispatchGroup()
+        for tupleInArray in arrayForUrls {
+            var url = URL(string: tupleInArray.url)!
+            group.enter()
             // Define a download task. The download task will download the contents of the URL as a Data object
-            let getImageFromUrl = session.dataTask(with: URL_IMAGE) { (data, response, error) in
+            let getImageFromUrl = session.dataTask(with: url, completionHandler: { (data, response, error) -> Void in
                 // The download has finished. if there is any error
                 if let e = error {
                     print("Error Occurred: \(e)")
                 } else {
                     // No errors found.
                     if (response as? HTTPURLResponse) != nil {
-                        //checking if the response contains an image
-                        if let imageData = data {
-                            //convert that Data into an image
-                            self.downloadImage = UIImage(data: imageData)!
-                            //view must be used from main thread only, see https://developer.apple.com/documentation/code_diagnostics/main_thread_checker
-                            DispatchQueue.main.async {
-                                self.dishes.append(CellContent(url: self.imageUrlStringType, image: self.downloadImage))
-                                
-                                self.dataTest = self.imageUrlStringType
-                            }
-                        } else {
-                            print("Couldn't get image: Image is nil")
-                        }
+                        self.processDownloadedData(fileName: url.lastPathComponent, data: data, fileType: tupleInArray.fileType)
                     } else {
                         print("Couldn't get response code for some reason")
                     }
                 }
-            }
+                group.leave()
+            })
             //starting the download task
             getImageFromUrl.resume()
+            
+        }
+        group.notify(queue: .main) {
+            //print(self.dlUrl)
+            //print(self.dlImage)
+            //print(self.dlScnObject)
+            //print(self.dlRenderPic)
+            self.dishes.append(CellContent(url: self.dlUrl, image: self.dlImage, scnObject: self.dlScnObject, renderPic: self.dlRenderPic))
+            //print(self.dishes)
         }
     }
     
+    func processDownloadedData(fileName: String, data: Data?, fileType: String) {
+        
+        if let Data = data {
+            switch fileType {
+            case "urlScnObject":
+                self.dlScnObject = Data
+                saveDataToDirectory(fileName: fileName, data: Data)
+            case "urlImage":
+                if let downloadImage = UIImage(data: Data) {
+                    //view must be used from main thread only, see https://developer.apple.com/documentation/code_diagnostics/main_thread_checker
+                    self.dlImage = downloadImage
+                }
+            case "urlDiffuse":
+                if let downloadImage = UIImage(data: Data) {
+                    self.dlRenderPic = downloadImage
+                    saveDataToDirectory(fileName: fileName, data: Data)
+                }
+            default:
+                break
+            }
+        }
+    }
+    
+    func saveDataToDirectory(fileName: String, data: Data) {
+        // create your document folder url
+        let tmpURL = FileManager.default.temporaryDirectory
+        // your destination file url
+        let destination = tmpURL.appendingPathComponent(fileName)//URL.lastPathComponent
+        //print("destination: \(destination.absoluteString)")
+        // check if it exists before downloading it
+        if FileManager().fileExists(atPath: destination.path) {
+            //print("The file already exists at path")
+        } else {
+            do {
+                try data.write(to: destination, options: [.atomic])
+                //FileManager.default.createFile(atPath: <#T##String#>, contents: <#T##Data?#>, attributes: <#T##[FileAttributeKey : Any]?#>)
+                //print("new file saved")
+            } catch {
+                print(error)
+            }
+        }
+    }
+    
+    func loadDataFromDirectory(fileName: String) -> Data? {
+        //print("fileName: \(fileName)")
+        let tmpURL = FileManager.default.temporaryDirectory
+        let targetLocation = tmpURL.appendingPathComponent(fileName).path
+        //print("targetLocation: \(targetLocation)")
+        let data:Data? = try? Data(contentsOf: URL(fileURLWithPath: targetLocation))
+        return data
+    }
+    /*
     func downloadDataAWS(dishName: String) {
         let expression = AWSS3TransferUtilityDownloadExpression()
         expression.progressBlock = {(task, progress) in DispatchQueue.main.async(execute: {
@@ -110,7 +165,7 @@ class VirtualObject {
                 else{
                     downloadImage = UIImage(data: data!)!
                     
-                    self.dishes.append(CellContent(url: dishName, image: downloadImage))
+                    //self.dishes.append(CellContent(url: dishName, image: downloadImage))
                 }
             })
         }
@@ -132,6 +187,7 @@ class VirtualObject {
                 return nil
         }
     }
+    */
 }
 
 /*
@@ -202,4 +258,19 @@ extension VirtualObject {
     }
 }
 */
-
+/*
+extension FileManager {
+    func clearTmpDirectory() {
+        do {
+            let tmpDirectory = try contentsOfDirectory(atPath: NSTemporaryDirectory())
+            try tmpDirectory.forEach {[unowned self] file in
+                let path = String.init(format: "%@%@", NSTemporaryDirectory(), file)
+                try self.removeItem(atPath: path)
+            }
+        } catch {
+            print(error)
+        }
+    }
+}
+FileManager.default.clearTmpDirectory()
+ */
